@@ -109,13 +109,17 @@ class Executor(object):
         # prepare init/free/kernel_entry
         self.init_flag = False
         if os.path.exists(os.path.join(nnf_rt_dir, "antares.dll")):
-            HLSLTensor.init_antares_lib(os.path.join(nnf_rt_dir, "antares.dll"))
+            with cd(nnf_rt_dir):
+                HLSLTensor.init_antares_lib(os.path.join(nnf_rt_dir, "antares.dll"))
         # dxil.dll and dxcompiler.dll must be manually imported
         if os.path.exists(os.path.join(nnf_rt_dir, "dxil.dll")):
-            ctypes.cdll.LoadLibrary(os.path.join(nnf_rt_dir, "dxil.dll"))
+            with cd(nnf_rt_dir):
+                ctypes.cdll.LoadLibrary(os.path.join(nnf_rt_dir, "dxil.dll"))
         if os.path.exists(os.path.join(nnf_rt_dir, "dxcompiler.dll")):
-            ctypes.cdll.LoadLibrary(os.path.join(nnf_rt_dir, "dxcompiler.dll"))
-        self.libnnf = ctypes.cdll.LoadLibrary(self.libnnf_path)
+            with cd(nnf_rt_dir):
+                ctypes.cdll.LoadLibrary(os.path.join(nnf_rt_dir, "dxcompiler.dll"))
+        with cd(nnf_rt_dir):
+            self.libnnf = ctypes.cdll.LoadLibrary(self.libnnf_path)
         if hasattr(self.libnnf, "kernel_entry_host"):
             self.kernel_entry = self.libnnf.kernel_entry_host
             self.host_mode = True
