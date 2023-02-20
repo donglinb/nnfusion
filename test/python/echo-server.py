@@ -12,7 +12,7 @@ if len(sys.argv) != 2:
     sys.exit(0)
 
 HOST = '127.0.0.1'
-PORT = 65433
+PORT = 65432
 
 cmd_options = [
     '-f onnx',
@@ -66,13 +66,12 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     while True:
         conn, addr = s.accept()
         with conn:
-            params = ''
             print(f'Connected by {addr}')
             while True:
                 data = conn.recv(10240)
                 if not data:
                     break
-                params += data.decode()
+                params = data.decode()
                 ret = {
                     'ret' : True,
                     'error' : '',
@@ -83,12 +82,16 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     output_dir = wslpath(params['output_dir'])
                     with cd(output_dir):
                         cmd = ' '.join([exec_path, model_path] + cmd_options)
-                        # subprocess.run(cmd, shell = True)
-                        out = execute(cmd)
+                        out = subprocess.run(cmd, stderr = subprocess.STDOUT, shell = True, encoding = 'utf8')
+                        # out = execute(cmd)
+                    if out.returncode != 0:
+                        ret['ret'] = False
+                        ret['error'] = out.stderr
                     print('model_path:', model_path)
                     print('output_dir:', output_dir)
-                    print('params:', params)
-                    print(out)
+                    print('return code:', out.returncode)
+                    print('stdout:', out.stdout)
+                    print('stderr:', out.stderr)
                 except Exception as e:
                     print(e)
                     ret['ret'] = False
