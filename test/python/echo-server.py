@@ -5,7 +5,7 @@ import socket
 import subprocess
 from contextlib import contextmanager
 from wslpath import wslpath
-
+# pip install wslpath-python
 
 if len(sys.argv) != 2:
     print('usage:', sys.argv[0], ' path-to-nnfusion-executable')
